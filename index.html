@@ -178,7 +178,17 @@
     .music-btn:hover { transform: translateY(-3px) scale(1.02); }
     .music-btn.playing { background: rgba(41, 112, 73, .92); }
     .music-btn.playing .music-icon { display: inline-block; animation: music 1s ease-in-out infinite alternate; }
+    .music-btn:disabled { cursor: wait; opacity: .78; transform: none; }
     @keyframes music { to { transform: rotate(-10deg) scale(1.15); } }
+
+    #youtubePlayer {
+      position: fixed;
+      width: 200px;
+      height: 200px;
+      left: -10000px;
+      top: 0;
+      overflow: hidden;
+    }
 
     main { position: relative; }
     section { padding: 92px 22px; }
@@ -696,26 +706,136 @@
     document.querySelectorAll(".reveal").forEach(element => revealObserver.observe(element));
 
     const musicButton = document.getElementById("musicButton");
-    const playerHost = document.getElementById("youtubePlayer");
+    const musicLabel = musicButton.querySelector(".music-label");
+    const musicVideoId = "XyaLhrXJkIk";
+    let musicPlayer;
     let musicPlaying = false;
+    let musicRequested = false;
+    let audioContext;
+    let fallbackTimer;
+    let fallbackNodes = [];
+
+    function updateMusicButton(isPlaying) {
+      musicPlaying = isPlaying;
+      musicButton.classList.toggle("playing", isPlaying);
+      musicButton.setAttribute("aria-pressed", String(isPlaying));
+      musicButton.setAttribute("aria-label", isPlaying ? "Tắt nhạc nền" : "Bật nhạc nền");
+      musicLabel.textContent = isPlaying ? "Tắt nhạc" : "Bật nhạc";
+    }
+
+    function scheduleFallbackBar() {
+      if (!musicRequested || !audioContext) return;
+
+      const beat = .52;
+      const barStart = audioContext.currentTime + .04;
+      const melody = [72, 74, 76, 79, 76, 74, 72, 69, 72, 74, 76, 74, 72, 69, 67, 69];
+      const chords = [
+        [48, 52, 55],
+        [53, 57, 60],
+        [45, 48, 52],
+        [43, 47, 50]
+      ];
+
+      const playTone = (midi, start, duration, volume, type = "sine") => {
+        const oscillator = audioContext.createOscillator();
+        const gain = audioContext.createGain();
+        const frequency = 440 * (2 ** ((midi - 69) / 12));
+        oscillator.type = type;
+        oscillator.frequency.setValueAtTime(frequency, start);
+        gain.gain.setValueAtTime(.0001, start);
+        gain.gain.exponentialRampToValueAtTime(volume, start + .025);
+        gain.gain.exponentialRampToValueAtTime(.0001, start + duration);
+        oscillator.connect(gain).connect(audioContext.destination);
+        oscillator.start(start);
+        oscillator.stop(start + duration + .03);
+        fallbackNodes.push(oscillator);
+        oscillator.addEventListener("ended", () => {
+          fallbackNodes = fallbackNodes.filter(node => node !== oscillator);
+        }, { once: true });
+      };
+
+      melody.forEach((note, index) => {
+        playTone(note, barStart + index * beat, beat * .82, .055);
+        if (index % 2 === 0) playTone(note + 12, barStart + index * beat, beat * .42, .016, "triangle");
+      });
+      chords.forEach((chord, index) => {
+        chord.forEach(note => playTone(note, barStart + index * beat * 4, beat * 3.7, .012, "triangle"));
+      });
+
+      fallbackTimer = window.setTimeout(scheduleFallbackBar, beat * 16 * 1000 - 180);
+    }
+
+    function startFallbackMusic() {
+      if (fallbackTimer || fallbackNodes.length) return;
+      const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+      if (!AudioContextClass) return;
+      audioContext ||= new AudioContextClass();
+      audioContext.resume();
+      scheduleFallbackBar();
+      musicButton.dataset.audioSource = "instrumental";
+    }
+
+    function stopFallbackMusic() {
+      window.clearTimeout(fallbackTimer);
+      fallbackTimer = undefined;
+      fallbackNodes.forEach(node => {
+        try { node.stop(); } catch (_) { /* Node may already be stopped. */ }
+      });
+      fallbackNodes = [];
+    }
+
+    window.onYouTubeIframeAPIReady = () => {
+      musicPlayer = new YT.Player("youtubePlayer", {
+        width: 200,
+        height: 200,
+        videoId: musicVideoId,
+        playerVars: {
+          autoplay: 0,
+          controls: 0,
+          disablekb: 1,
+          loop: 1,
+          playlist: musicVideoId,
+          playsinline: 1
+        },
+        events: {
+          onReady: () => updateMusicButton(musicRequested),
+          onStateChange: event => {
+            if (event.data === YT.PlayerState.PLAYING) {
+              stopFallbackMusic();
+              musicButton.dataset.audioSource = "youtube";
+              updateMusicButton(true);
+            }
+            if (musicRequested && [YT.PlayerState.PAUSED, YT.PlayerState.ENDED, YT.PlayerState.CUED].includes(event.data)) {
+              startFallbackMusic();
+            }
+          },
+          onError: () => {
+            if (musicRequested) startFallbackMusic();
+          }
+        }
+      });
+    };
 
     musicButton.addEventListener("click", () => {
-      if (!musicPlaying) {
-        playerHost.innerHTML = `<iframe width="1" height="1" src="https://www.youtube.com/embed/XyaLhrXJkIk?autoplay=1&loop=1&playlist=XyaLhrXJkIk&controls=0" title="Nhạc nền tri ân thầy cô" allow="autoplay; encrypted-media" referrerpolicy="strict-origin-when-cross-origin"></iframe>`;
-        musicPlaying = true;
-        musicButton.classList.add("playing");
-        musicButton.setAttribute("aria-pressed", "true");
-        musicButton.setAttribute("aria-label", "Tắt nhạc nền");
-        musicButton.querySelector(".music-label").textContent = "Tắt nhạc";
-      } else {
-        playerHost.innerHTML = "";
-        musicPlaying = false;
-        musicButton.classList.remove("playing");
-        musicButton.setAttribute("aria-pressed", "false");
-        musicButton.setAttribute("aria-label", "Bật nhạc nền");
-        musicButton.querySelector(".music-label").textContent = "Bật nhạc";
+      if (musicPlaying) {
+        musicRequested = false;
+        if (musicPlayer && typeof musicPlayer.pauseVideo === "function") musicPlayer.pauseVideo();
+        stopFallbackMusic();
+        delete musicButton.dataset.audioSource;
+        updateMusicButton(false);
+        return;
       }
+
+      musicRequested = true;
+      updateMusicButton(true);
+      startFallbackMusic();
+      if (musicPlayer && typeof musicPlayer.playVideo === "function") musicPlayer.playVideo();
     });
+
+    const youtubeApi = document.createElement("script");
+    youtubeApi.src = "https://www.youtube.com/iframe_api";
+    youtubeApi.async = true;
+    document.head.appendChild(youtubeApi);
   </script>
 </body>
 </html>
