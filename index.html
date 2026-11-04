@@ -178,7 +178,7 @@
     .music-btn:hover { transform: translateY(-3px) scale(1.02); }
     .music-btn.playing { background: rgba(41, 112, 73, .92); }
     .music-btn.playing .music-icon { display: inline-block; animation: music 1s ease-in-out infinite alternate; }
-    .music-btn:disabled { cursor: wait; opacity: .78; transform: none; }
+    .music-btn:disabled { cursor: not-allowed; opacity: .7; transform: none; }
     @keyframes music { to { transform: rotate(-10deg) scale(1.15); } }
 
     #youtubePlayer {
@@ -375,6 +375,36 @@
       line-height: 1.25;
       text-align: center;
     }
+    .voice-controls {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin: -4px 0 30px;
+    }
+    .voice-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 9px;
+      min-height: 46px;
+      padding: 11px 19px;
+      border: 1px solid rgba(143,29,44,.2);
+      border-radius: 999px;
+      color: white;
+      cursor: pointer;
+      font: 700 .9rem/1.2 "Be Vietnam Pro", sans-serif;
+      background: var(--wine);
+      box-shadow: 0 9px 24px rgba(95,18,31,.2);
+      transition: transform .25s, background .25s, box-shadow .25s;
+    }
+    .voice-btn:hover { transform: translateY(-2px); box-shadow: 0 12px 28px rgba(95,18,31,.28); }
+    .voice-btn.speaking { background: #297049; }
+    .voice-btn.speaking .voice-icon { animation: voice-pulse .85s ease-in-out infinite alternate; }
+    .voice-btn:disabled { cursor: not-allowed; opacity: .58; transform: none; }
+    .voice-status { min-width: 150px; color: var(--muted); font-size: .82rem; }
+    @keyframes voice-pulse { to { transform: scale(1.18); } }
     .letter-card p { margin: 0 0 21px; font-size: clamp(.96rem, 1.5vw, 1.07rem); line-height: 1.95; }
     .letter-card .highlight {
       margin-top: 32px;
@@ -568,8 +598,15 @@
           <p class="section-kicker">Lời yêu thương gửi trao</p>
           <h2 class="section-title">Một bức thư nhỏ, ngàn lời biết ơn</h2>
         </div>
-        <article class="letter-card reveal">
+        <article class="letter-card reveal" id="letterCard">
           <h2>GỬI THẦY CÔ – NGƯỜI KẾT NỐI NHỮNG ƯỚC MƠ</h2>
+          <div class="voice-controls">
+            <button class="voice-btn" id="voiceButton" type="button" aria-label="Nghe đọc lời chúc" aria-pressed="false">
+              <span class="voice-icon" aria-hidden="true">🔊</span>
+              <span class="voice-label">Nghe lời chúc</span>
+            </button>
+            <span class="voice-status" id="voiceStatus" aria-live="polite"></span>
+          </div>
           <p>Trong thế giới 4.0, công nghệ giúp chúng em kết nối vạn điều, nhưng chính thầy cô đã kết nối những trái tim, thắp sáng niềm tin và mở ra cánh cửa tri thức.</p>
           <p>Thầy cô không chỉ dạy chúng em những bài học trong trang sách, mà còn gieo vào lòng chúng em những hạt mầm tử tế, lòng dũng cảm và khát vọng vươn xa.</p>
           <p>Mai này, chúng em có thể lớn lên cùng những công nghệ hiện đại, có thể đi đến những chân trời mới, nhưng sẽ luôn nhớ về người đã dìu dắt những bước chân đầu tiên.</p>
@@ -707,10 +744,16 @@
 
     const musicButton = document.getElementById("musicButton");
     const musicLabel = musicButton.querySelector(".music-label");
+    const voiceButton = document.getElementById("voiceButton");
+    const voiceLabel = voiceButton.querySelector(".voice-label");
+    const voiceStatus = document.getElementById("voiceStatus");
+    const letterCard = document.getElementById("letterCard");
     const musicVideoId = "XyaLhrXJkIk";
     let musicPlayer;
     let musicPlaying = false;
     let musicRequested = false;
+    let voiceReading = false;
+    let resumeMusicAfterVoice = false;
     let audioContext;
     let fallbackTimer;
     let fallbackNodes = [];
@@ -805,7 +848,7 @@
               musicButton.dataset.audioSource = "youtube";
               updateMusicButton(true);
             }
-            if (musicRequested && [YT.PlayerState.PAUSED, YT.PlayerState.ENDED, YT.PlayerState.CUED].includes(event.data)) {
+            if (musicRequested && !voiceReading && [YT.PlayerState.PAUSED, YT.PlayerState.ENDED, YT.PlayerState.CUED].includes(event.data)) {
               startFallbackMusic();
             }
           },
@@ -831,6 +874,92 @@
       startFallbackMusic();
       if (musicPlayer && typeof musicPlayer.playVideo === "function") musicPlayer.playVideo();
     });
+
+    const speechSupported = "speechSynthesis" in window && "SpeechSynthesisUtterance" in window;
+    const voiceChunks = Array.from(letterCard.querySelectorAll("h2, p"), element => element.textContent
+      .replace(/[💖🌻]/gu, "")
+      .replaceAll("5/4", "năm bốn")
+      .replaceAll("4.0", "bốn chấm không")
+      .replace(/\s+/g, " ")
+      .trim());
+
+    function updateVoiceButton(isReading) {
+      voiceButton.classList.toggle("speaking", isReading);
+      voiceButton.setAttribute("aria-pressed", String(isReading));
+      voiceButton.setAttribute("aria-label", isReading ? "Dừng đọc lời chúc" : "Nghe đọc lời chúc");
+      voiceLabel.textContent = isReading ? "Dừng đọc" : "Nghe lời chúc";
+    }
+
+    function resumeMusicAfterReading() {
+      const shouldResume = resumeMusicAfterVoice && musicRequested;
+      resumeMusicAfterVoice = false;
+      if (!shouldResume) return;
+      updateMusicButton(true);
+      startFallbackMusic();
+      if (musicPlayer && typeof musicPlayer.playVideo === "function") musicPlayer.playVideo();
+    }
+
+    function finishVoiceReading(status = "") {
+      if (!voiceReading) return;
+      voiceReading = false;
+      musicButton.disabled = false;
+      updateVoiceButton(false);
+      voiceStatus.textContent = status;
+      resumeMusicAfterReading();
+    }
+
+    function startVoiceReading() {
+      window.speechSynthesis.cancel();
+      voiceReading = true;
+      resumeMusicAfterVoice = musicRequested;
+      musicButton.disabled = true;
+      stopFallbackMusic();
+      if (musicPlayer && typeof musicPlayer.pauseVideo === "function") musicPlayer.pauseVideo();
+      updateMusicButton(false);
+      updateVoiceButton(true);
+      voiceStatus.textContent = "Đang chuẩn bị giọng đọc...";
+
+      const voices = window.speechSynthesis.getVoices();
+      const vietnameseVoice = voices.find(voice => /^vi(?:-|_)/i.test(voice.lang))
+        || voices.find(voice => /vietnam/i.test(voice.name));
+
+      voiceChunks.forEach((chunk, index) => {
+        const utterance = new SpeechSynthesisUtterance(chunk);
+        utterance.lang = "vi-VN";
+        utterance.rate = .9;
+        utterance.pitch = 1.02;
+        utterance.volume = 1;
+        if (vietnameseVoice) utterance.voice = vietnameseVoice;
+        utterance.onstart = () => {
+          if (voiceReading) voiceStatus.textContent = `Đang đọc ${index + 1}/${voiceChunks.length}`;
+        };
+        if (index === voiceChunks.length - 1) {
+          utterance.onend = () => finishVoiceReading("Đã đọc xong lời chúc.");
+        }
+        utterance.onerror = event => {
+          if (voiceReading && !["canceled", "interrupted"].includes(event.error)) {
+            window.speechSynthesis.cancel();
+            finishVoiceReading("Thiết bị chưa hỗ trợ giọng đọc tiếng Việt.");
+          }
+        };
+        window.speechSynthesis.speak(utterance);
+      });
+    }
+
+    if (!speechSupported) {
+      voiceButton.disabled = true;
+      voiceButton.setAttribute("aria-label", "Thiết bị không hỗ trợ giọng đọc");
+      voiceLabel.textContent = "Không hỗ trợ giọng đọc";
+    } else {
+      voiceButton.addEventListener("click", () => {
+        if (voiceReading) {
+          window.speechSynthesis.cancel();
+          finishVoiceReading("Đã dừng giọng đọc.");
+        } else {
+          startVoiceReading();
+        }
+      });
+    }
 
     const youtubeApi = document.createElement("script");
     youtubeApi.src = "https://www.youtube.com/iframe_api";
