@@ -552,7 +552,7 @@
   <button class="music-btn" id="musicButton" type="button" aria-label="Bật nhạc nền" aria-pressed="false">
     <span class="music-icon">♫</span> <span class="music-label">Bật nhạc</span>
   </button>
-  <audio id="musicAudio" src="nhac-nen-thuong-lam-thay-co-oi.mp3" preload="metadata" loop hidden></audio>
+  <audio id="musicAudio" src="nhac-nen-thuong-lam-thay-co-oi.mp3" preload="metadata" hidden></audio>
 
   <main>
     <section>
@@ -765,6 +765,7 @@
 
       musicRequested = true;
       try {
+        if (musicAudio.ended) musicAudio.currentTime = 0;
         await musicAudio.play();
       } catch (_) {
         musicRequested = false;
@@ -784,6 +785,12 @@
       delete musicButton.dataset.audioSource;
       updateMusicButton(false);
       musicLabel.textContent = "Không tải được nhạc";
+    });
+    musicAudio.addEventListener("ended", () => {
+      musicRequested = false;
+      musicAudio.currentTime = 0;
+      delete musicButton.dataset.audioSource;
+      updateMusicButton(false);
     });
 
     function updateVoiceButton(isReading) {
