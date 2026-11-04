@@ -606,6 +606,7 @@
               <span class="voice-label">Nghe lời chúc</span>
             </button>
             <span class="voice-status" id="voiceStatus" aria-live="polite"></span>
+            <audio id="voiceAudio" src="gui_thay_co_nhung_nguoi_ket_noi_nhung_uoc_trimmed.mp3" preload="metadata" hidden></audio>
           </div>
           <p>Trong thế giới 4.0, công nghệ giúp chúng em kết nối vạn điều, nhưng chính thầy cô đã kết nối những trái tim, thắp sáng niềm tin và mở ra cánh cửa tri thức.</p>
           <p>Thầy cô không chỉ dạy chúng em những bài học trong trang sách, mà còn gieo vào lòng chúng em những hạt mầm tử tế, lòng dũng cảm và khát vọng vươn xa.</p>
@@ -747,8 +748,8 @@
     const voiceButton = document.getElementById("voiceButton");
     const voiceLabel = voiceButton.querySelector(".voice-label");
     const voiceStatus = document.getElementById("voiceStatus");
-    const letterCard = document.getElementById("letterCard");
-    const musicVideoId = "XyaLhrXJkIk";
+    const voiceAudio = document.getElementById("voiceAudio");
+    const musicVideoId = "44i87c9Am_Y";
     let musicPlayer;
     let musicPlaying = false;
     let musicRequested = false;
@@ -875,14 +876,6 @@
       if (musicPlayer && typeof musicPlayer.playVideo === "function") musicPlayer.playVideo();
     });
 
-    const speechSupported = "speechSynthesis" in window && "SpeechSynthesisUtterance" in window;
-    const voiceChunks = Array.from(letterCard.querySelectorAll("h2, p"), element => element.textContent
-      .replace(/[💖🌻]/gu, "")
-      .replaceAll("5/4", "năm bốn")
-      .replaceAll("4.0", "bốn chấm không")
-      .replace(/\s+/g, " ")
-      .trim());
-
     function updateVoiceButton(isReading) {
       voiceButton.classList.toggle("speaking", isReading);
       voiceButton.setAttribute("aria-pressed", String(isReading));
@@ -908,8 +901,14 @@
       resumeMusicAfterReading();
     }
 
-    function startVoiceReading() {
-      window.speechSynthesis.cancel();
+    function formatAudioTime(seconds) {
+      if (!Number.isFinite(seconds)) return "0:00";
+      const minutes = Math.floor(seconds / 60);
+      const remainingSeconds = Math.floor(seconds % 60).toString().padStart(2, "0");
+      return `${minutes}:${remainingSeconds}`;
+    }
+
+    async function startVoiceReading() {
       voiceReading = true;
       resumeMusicAfterVoice = musicRequested;
       musicButton.disabled = true;
@@ -917,49 +916,38 @@
       if (musicPlayer && typeof musicPlayer.pauseVideo === "function") musicPlayer.pauseVideo();
       updateMusicButton(false);
       updateVoiceButton(true);
-      voiceStatus.textContent = "Đang chuẩn bị giọng đọc...";
+      voiceStatus.textContent = "Đang tải lời chúc...";
 
-      const voices = window.speechSynthesis.getVoices();
-      const vietnameseVoice = voices.find(voice => /^vi(?:-|_)/i.test(voice.lang))
-        || voices.find(voice => /vietnam/i.test(voice.name));
-
-      voiceChunks.forEach((chunk, index) => {
-        const utterance = new SpeechSynthesisUtterance(chunk);
-        utterance.lang = "vi-VN";
-        utterance.rate = .9;
-        utterance.pitch = 1.02;
-        utterance.volume = 1;
-        if (vietnameseVoice) utterance.voice = vietnameseVoice;
-        utterance.onstart = () => {
-          if (voiceReading) voiceStatus.textContent = `Đang đọc ${index + 1}/${voiceChunks.length}`;
-        };
-        if (index === voiceChunks.length - 1) {
-          utterance.onend = () => finishVoiceReading("Đã đọc xong lời chúc.");
-        }
-        utterance.onerror = event => {
-          if (voiceReading && !["canceled", "interrupted"].includes(event.error)) {
-            window.speechSynthesis.cancel();
-            finishVoiceReading("Thiết bị chưa hỗ trợ giọng đọc tiếng Việt.");
-          }
-        };
-        window.speechSynthesis.speak(utterance);
-      });
+      try {
+        voiceAudio.currentTime = 0;
+        await voiceAudio.play();
+      } catch (_) {
+        finishVoiceReading("Không thể phát file lời chúc trên thiết bị này.");
+      }
     }
 
-    if (!speechSupported) {
-      voiceButton.disabled = true;
-      voiceButton.setAttribute("aria-label", "Thiết bị không hỗ trợ giọng đọc");
-      voiceLabel.textContent = "Không hỗ trợ giọng đọc";
-    } else {
-      voiceButton.addEventListener("click", () => {
-        if (voiceReading) {
-          window.speechSynthesis.cancel();
-          finishVoiceReading("Đã dừng giọng đọc.");
-        } else {
-          startVoiceReading();
-        }
-      });
-    }
+    voiceAudio.addEventListener("playing", () => {
+      if (voiceReading) voiceStatus.textContent = `Đang nghe 0:00 / ${formatAudioTime(voiceAudio.duration)}`;
+    });
+    voiceAudio.addEventListener("timeupdate", () => {
+      if (voiceReading) {
+        voiceStatus.textContent = `Đang nghe ${formatAudioTime(voiceAudio.currentTime)} / ${formatAudioTime(voiceAudio.duration)}`;
+      }
+    });
+    voiceAudio.addEventListener("ended", () => finishVoiceReading("Đã nghe xong lời chúc."));
+    voiceAudio.addEventListener("error", () => {
+      if (voiceReading) finishVoiceReading("Không thể tải file lời chúc.");
+    });
+
+    voiceButton.addEventListener("click", () => {
+      if (voiceReading) {
+        voiceAudio.pause();
+        voiceAudio.currentTime = 0;
+        finishVoiceReading("Đã dừng lời chúc.");
+      } else {
+        startVoiceReading();
+      }
+    });
 
     const youtubeApi = document.createElement("script");
     youtubeApi.src = "https://www.youtube.com/iframe_api";
