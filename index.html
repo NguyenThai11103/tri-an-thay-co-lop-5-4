@@ -233,6 +233,11 @@
       box-shadow: 0 10px 25px rgba(89,19,29,.25);
     }
     .feature-frame img { width: 100%; height: 100%; object-fit: cover; border-radius: 26px 26px 150px 26px; }
+    .feature-frame.visible { animation: float-frame 6s ease-in-out infinite; }
+    @keyframes float-frame {
+      0%, 100% { transform: translateY(0) rotate(-.35deg); }
+      50% { transform: translateY(-10px) rotate(.35deg); }
+    }
     .quote-mark { color: var(--gold); font: 700 5rem/1 Georgia, serif; height: 50px; }
     .story-copy blockquote {
       margin: 18px 0 25px;
@@ -242,6 +247,78 @@
       line-height: 1.45;
     }
     .story-copy p { color: var(--muted); line-height: 1.85; }
+
+    .motion-gallery {
+      padding: 28px 0 96px;
+      overflow: hidden;
+    }
+    .motion-gallery-head {
+      width: min(1160px, calc(100% - 44px));
+      margin: 0 auto 27px;
+      display: flex;
+      align-items: end;
+      justify-content: space-between;
+      gap: 24px;
+    }
+    .motion-gallery-head h2 {
+      margin: 0;
+      font-family: "Playfair Display", Georgia, serif;
+      font-size: clamp(1.8rem, 3.5vw, 3.1rem);
+      letter-spacing: -.03em;
+    }
+    .motion-gallery-head p:last-child {
+      margin: 0;
+      color: var(--muted);
+      font-size: .82rem;
+    }
+    .photo-marquee {
+      position: relative;
+      width: 100%;
+      overflow: hidden;
+      mask-image: linear-gradient(90deg, transparent, black 7%, black 93%, transparent);
+      -webkit-mask-image: linear-gradient(90deg, transparent, black 7%, black 93%, transparent);
+    }
+    .photo-marquee::before,
+    .photo-marquee::after {
+      content: "";
+      position: absolute;
+      top: 50%;
+      z-index: 2;
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: var(--gold);
+      box-shadow: 0 0 0 7px rgba(215,169,61,.13), 0 0 24px rgba(215,169,61,.65);
+    }
+    .photo-marquee::before { left: 4%; }
+    .photo-marquee::after { right: 4%; }
+    .marquee-track {
+      display: flex;
+      width: max-content;
+      animation: photo-run 62s linear infinite;
+      will-change: transform;
+    }
+    .marquee-group { display: flex; gap: 14px; padding-right: 14px; }
+    .marquee-card {
+      flex: 0 0 auto;
+      width: clamp(190px, 23vw, 330px);
+      aspect-ratio: 4 / 3;
+      overflow: hidden;
+      border: 5px solid white;
+      border-radius: 22px;
+      background: #eadfca;
+      box-shadow: 0 14px 32px rgba(76,39,29,.15);
+      transform: rotate(var(--tilt, 0deg));
+      transition: transform .4s ease, box-shadow .4s ease;
+    }
+    .marquee-card:nth-child(3n + 1) { --tilt: -.7deg; }
+    .marquee-card:nth-child(3n + 2) { --tilt: .7deg; }
+    .marquee-card img { width: 100%; height: 100%; object-fit: cover; transition: transform .6s ease; }
+    .marquee-card:hover { transform: translateY(-8px) rotate(0); box-shadow: 0 20px 42px rgba(76,39,29,.22); }
+    .marquee-card:hover img { transform: scale(1.06); }
+    .photo-marquee:hover .marquee-track,
+    .photo-marquee:focus-within .marquee-track { animation-play-state: paused; }
+    @keyframes photo-run { to { transform: translateX(-50%); } }
 
     .letter-wrap {
       background:
@@ -397,6 +474,10 @@
       .story-grid { grid-template-columns: 1fr; }
       .feature-frame { width: min(430px, 92%); margin: 0 auto; }
       .feature-frame::before { right: -22px; }
+      .motion-gallery { padding: 10px 0 72px; }
+      .motion-gallery-head { width: calc(100% - 36px); align-items: start; flex-direction: column; gap: 8px; }
+      .marquee-track { animation-duration: 48s; }
+      .marquee-card { width: clamp(180px, 65vw, 265px); }
       .gallery-head { align-items: start; flex-direction: column; }
       .photo-grid { columns: 2 145px; column-gap: 10px; }
       .photo { margin-bottom: 10px; border-radius: 12px; }
@@ -416,6 +497,10 @@
       html { scroll-behavior: auto; }
       *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
       .reveal { opacity: 1; transform: none; }
+      .feature-frame.visible { animation: none; }
+      .photo-marquee { overflow-x: auto; mask-image: none; -webkit-mask-image: none; }
+      .marquee-track { animation: none; }
+      .marquee-group[aria-hidden="true"] { display: none; }
     }
   </style>
 </head>
@@ -451,6 +536,19 @@
           <blockquote>Thầy cô là người thắp sáng niềm tin, mở cánh cửa tri thức và dìu dắt những bước chân đầu tiên.</blockquote>
           <p>Mỗi bài giảng, mỗi lời động viên và mỗi nụ cười của thầy cô đều trở thành hành trang quý giá để chúng em tự tin bước đến những chân trời mới.</p>
         </div>
+      </div>
+    </section>
+
+    <section class="motion-gallery" id="anh-chay" aria-labelledby="anh-chay-title">
+      <div class="motion-gallery-head reveal">
+        <div>
+          <p class="section-kicker">Dòng thời gian yêu thương</p>
+          <h2 id="anh-chay-title">Kỷ niệm cứ thế nối dài...</h2>
+        </div>
+        <p>Rê chuột lên ảnh để tạm dừng</p>
+      </div>
+      <div class="photo-marquee" aria-label="Dải ảnh kỷ niệm tự động chạy">
+        <div class="marquee-track" id="marqueeTrack"></div>
       </div>
     </section>
 
@@ -538,10 +636,26 @@
       button.className = "photo reveal";
       button.type = "button";
       button.setAttribute("aria-label", `Xem ảnh kỷ niệm ${index + 1}`);
+      button.style.transitionDelay = `${(index % 8) * 55}ms`;
       button.innerHTML = `<img src="img/${file}" alt="Khoảnh khắc kỷ niệm ${index + 1} của lớp 5/4" loading="lazy">`;
       button.addEventListener("click", () => openLightbox(index));
       grid.appendChild(button);
     });
+
+    const marqueeTrack = document.getElementById("marqueeTrack");
+    const marqueeMarkup = images.map((file, index) => `
+      <div class="marquee-card">
+        <img src="img/${file}" alt="Kỷ niệm lớp 5/4 – ảnh ${index + 1}" loading="lazy">
+      </div>`).join("");
+    marqueeTrack.innerHTML = `
+      <div class="marquee-group">${marqueeMarkup}</div>
+      <div class="marquee-group" aria-hidden="true">${marqueeMarkup.replaceAll(/alt="[^"]*"/g, 'alt=""')}</div>`;
+
+    if (location.hash) {
+      requestAnimationFrame(() => setTimeout(() => {
+        document.querySelector(location.hash)?.scrollIntoView();
+      }, 120));
+    }
 
     let currentPhoto = 0;
     const lightbox = document.getElementById("lightbox");
