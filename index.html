@@ -181,15 +181,6 @@
     .music-btn:disabled { cursor: not-allowed; opacity: .7; transform: none; }
     @keyframes music { to { transform: rotate(-10deg) scale(1.15); } }
 
-    #youtubePlayer {
-      position: fixed;
-      width: 200px;
-      height: 200px;
-      left: -10000px;
-      top: 0;
-      overflow: hidden;
-    }
-
     main { position: relative; }
     section { padding: 92px 22px; }
     .container { width: min(1160px, 100%); margin: 0 auto; }
@@ -561,7 +552,7 @@
   <button class="music-btn" id="musicButton" type="button" aria-label="Bật nhạc nền" aria-pressed="false">
     <span class="music-icon">♫</span> <span class="music-label">Bật nhạc</span>
   </button>
-  <div id="youtubePlayer" aria-hidden="true"></div>
+  <audio id="musicAudio" src="nhac-nen-thuong-lam-thay-co-oi.mp3" preload="metadata" loop hidden></audio>
 
   <main>
     <section>
@@ -749,15 +740,11 @@
     const voiceLabel = voiceButton.querySelector(".voice-label");
     const voiceStatus = document.getElementById("voiceStatus");
     const voiceAudio = document.getElementById("voiceAudio");
-    const musicVideoId = "44i87c9Am_Y";
-    let musicPlayer;
+    const musicAudio = document.getElementById("musicAudio");
     let musicPlaying = false;
     let musicRequested = false;
     let voiceReading = false;
     let resumeMusicAfterVoice = false;
-    let audioContext;
-    let fallbackTimer;
-    let fallbackNodes = [];
 
     function updateMusicButton(isPlaying) {
       musicPlaying = isPlaying;
@@ -767,113 +754,36 @@
       musicLabel.textContent = isPlaying ? "Tắt nhạc" : "Bật nhạc";
     }
 
-    function scheduleFallbackBar() {
-      if (!musicRequested || !audioContext) return;
-
-      const beat = .52;
-      const barStart = audioContext.currentTime + .04;
-      const melody = [72, 74, 76, 79, 76, 74, 72, 69, 72, 74, 76, 74, 72, 69, 67, 69];
-      const chords = [
-        [48, 52, 55],
-        [53, 57, 60],
-        [45, 48, 52],
-        [43, 47, 50]
-      ];
-
-      const playTone = (midi, start, duration, volume, type = "sine") => {
-        const oscillator = audioContext.createOscillator();
-        const gain = audioContext.createGain();
-        const frequency = 440 * (2 ** ((midi - 69) / 12));
-        oscillator.type = type;
-        oscillator.frequency.setValueAtTime(frequency, start);
-        gain.gain.setValueAtTime(.0001, start);
-        gain.gain.exponentialRampToValueAtTime(volume, start + .025);
-        gain.gain.exponentialRampToValueAtTime(.0001, start + duration);
-        oscillator.connect(gain).connect(audioContext.destination);
-        oscillator.start(start);
-        oscillator.stop(start + duration + .03);
-        fallbackNodes.push(oscillator);
-        oscillator.addEventListener("ended", () => {
-          fallbackNodes = fallbackNodes.filter(node => node !== oscillator);
-        }, { once: true });
-      };
-
-      melody.forEach((note, index) => {
-        playTone(note, barStart + index * beat, beat * .82, .055);
-        if (index % 2 === 0) playTone(note + 12, barStart + index * beat, beat * .42, .016, "triangle");
-      });
-      chords.forEach((chord, index) => {
-        chord.forEach(note => playTone(note, barStart + index * beat * 4, beat * 3.7, .012, "triangle"));
-      });
-
-      fallbackTimer = window.setTimeout(scheduleFallbackBar, beat * 16 * 1000 - 180);
-    }
-
-    function startFallbackMusic() {
-      if (fallbackTimer || fallbackNodes.length) return;
-      const AudioContextClass = window.AudioContext || window.webkitAudioContext;
-      if (!AudioContextClass) return;
-      audioContext ||= new AudioContextClass();
-      audioContext.resume();
-      scheduleFallbackBar();
-      musicButton.dataset.audioSource = "instrumental";
-    }
-
-    function stopFallbackMusic() {
-      window.clearTimeout(fallbackTimer);
-      fallbackTimer = undefined;
-      fallbackNodes.forEach(node => {
-        try { node.stop(); } catch (_) { /* Node may already be stopped. */ }
-      });
-      fallbackNodes = [];
-    }
-
-    window.onYouTubeIframeAPIReady = () => {
-      musicPlayer = new YT.Player("youtubePlayer", {
-        width: 200,
-        height: 200,
-        videoId: musicVideoId,
-        playerVars: {
-          autoplay: 0,
-          controls: 0,
-          disablekb: 1,
-          loop: 1,
-          playlist: musicVideoId,
-          playsinline: 1
-        },
-        events: {
-          onReady: () => updateMusicButton(musicRequested),
-          onStateChange: event => {
-            if (event.data === YT.PlayerState.PLAYING) {
-              stopFallbackMusic();
-              musicButton.dataset.audioSource = "youtube";
-              updateMusicButton(true);
-            }
-            if (musicRequested && !voiceReading && [YT.PlayerState.PAUSED, YT.PlayerState.ENDED, YT.PlayerState.CUED].includes(event.data)) {
-              startFallbackMusic();
-            }
-          },
-          onError: () => {
-            if (musicRequested) startFallbackMusic();
-          }
-        }
-      });
-    };
-
-    musicButton.addEventListener("click", () => {
+    musicButton.addEventListener("click", async () => {
       if (musicPlaying) {
         musicRequested = false;
-        if (musicPlayer && typeof musicPlayer.pauseVideo === "function") musicPlayer.pauseVideo();
-        stopFallbackMusic();
+        musicAudio.pause();
         delete musicButton.dataset.audioSource;
         updateMusicButton(false);
         return;
       }
 
       musicRequested = true;
-      updateMusicButton(true);
-      startFallbackMusic();
-      if (musicPlayer && typeof musicPlayer.playVideo === "function") musicPlayer.playVideo();
+      try {
+        await musicAudio.play();
+      } catch (_) {
+        musicRequested = false;
+        updateMusicButton(false);
+        musicLabel.textContent = "Thử lại nhạc";
+      }
+    });
+
+    musicAudio.addEventListener("playing", () => {
+      if (!voiceReading && musicRequested) {
+        musicButton.dataset.audioSource = "mp3";
+        updateMusicButton(true);
+      }
+    });
+    musicAudio.addEventListener("error", () => {
+      musicRequested = false;
+      delete musicButton.dataset.audioSource;
+      updateMusicButton(false);
+      musicLabel.textContent = "Không tải được nhạc";
     });
 
     function updateVoiceButton(isReading) {
@@ -887,9 +797,10 @@
       const shouldResume = resumeMusicAfterVoice && musicRequested;
       resumeMusicAfterVoice = false;
       if (!shouldResume) return;
-      updateMusicButton(true);
-      startFallbackMusic();
-      if (musicPlayer && typeof musicPlayer.playVideo === "function") musicPlayer.playVideo();
+      musicAudio.play().catch(() => {
+        musicRequested = false;
+        updateMusicButton(false);
+      });
     }
 
     function finishVoiceReading(status = "") {
@@ -912,8 +823,7 @@
       voiceReading = true;
       resumeMusicAfterVoice = musicRequested;
       musicButton.disabled = true;
-      stopFallbackMusic();
-      if (musicPlayer && typeof musicPlayer.pauseVideo === "function") musicPlayer.pauseVideo();
+      musicAudio.pause();
       updateMusicButton(false);
       updateVoiceButton(true);
       voiceStatus.textContent = "Đang tải lời chúc...";
@@ -949,10 +859,6 @@
       }
     });
 
-    const youtubeApi = document.createElement("script");
-    youtubeApi.src = "https://www.youtube.com/iframe_api";
-    youtubeApi.async = true;
-    document.head.appendChild(youtubeApi);
   </script>
 </body>
 </html>
