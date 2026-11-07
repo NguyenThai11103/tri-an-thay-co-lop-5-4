@@ -296,7 +296,7 @@
     .marquee-track {
       display: flex;
       width: max-content;
-      animation: photo-run 90s linear infinite;
+      animation: photo-run 100s linear infinite;
       will-change: transform;
     }
     .marquee-group { display: flex; gap: 14px; padding-right: 14px; }
@@ -815,7 +815,7 @@
       .feature-frame::before { right: -22px; }
       .motion-gallery { padding: 10px 0 72px; }
       .motion-gallery-head { width: calc(100% - 36px); align-items: start; flex-direction: column; gap: 8px; }
-      .marquee-track { animation-duration: 70s; }
+      .marquee-track { animation-duration: 78s; }
       .marquee-card { width: clamp(180px, 65vw, 265px); }
       .video-layout { grid-template-columns: 1fr; gap: 38px; }
       .video-copy { max-width: 680px; }
@@ -1095,8 +1095,17 @@
       "GVCN/1793891728695_3110120158068953311_3110120158068953311_2bf9b504a6cdc4d40deeb08f3e3185b8.jpg"
     ];
 
+    const marqueeOnlyGvcnImages = [
+      "GVCN/1793014065750_3110120158068953311_3110120158068953311_f2efa9350d5a3544eb192bf4472266da.jpg",
+      "GVCN/1793181786422_3110120158068953311_3110120158068953311_47cb47ab14736dcf5ff0c9dd04981075.jpg",
+      "GVCN/1793181786441_3110120158068953311_3110120158068953311_137834e9daee82a91c9db3e62ef0558a.jpg",
+      "GVCN/1793181786456_3110120158068953311_3110120158068953311_6b496b6a0cfa820d85be2eb185e82e6e.jpg",
+      "GVCN/1793679367316_3110120158068953311_3110120158068953311_9a2ed24e6d40d8c2baaa3b442b34523e.jpg"
+    ];
+
     const mainGalleryPaths = images.map(file => `img/${file}`);
     const gvcnGalleryPaths = gvcnImages.map(file => `img/${file}`);
+    const marqueeOnlyGvcnPaths = marqueeOnlyGvcnImages.map(file => `img/${file}`);
     const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     const portraitImageNames = new Set([
       "1793014065718_3110120158068953311_3110120158068953311_f9e1a4f6d2c85496e07036f5209bd3c6.jpg",
@@ -1187,7 +1196,7 @@
     renderPhotoGrid("gvcnPhotoGrid", gvcnGalleryPaths, "Ảnh thầy cô giáo đã dạy lớp 5/4");
 
     const marqueeTrack = document.getElementById("marqueeTrack");
-    const marqueeImages = [...mainGalleryPaths, ...gvcnGalleryPaths];
+    const marqueeImages = [...mainGalleryPaths, ...gvcnGalleryPaths, ...marqueeOnlyGvcnPaths];
     const marqueeMarkup = marqueeImages.map((path, index) => `
       <div class="marquee-card">
         <img src="${path}" alt="Kỷ niệm lớp 5/4 và thầy cô – ảnh ${index + 1}" loading="lazy">
