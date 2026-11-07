@@ -296,7 +296,7 @@
     .marquee-track {
       display: flex;
       width: max-content;
-      animation: photo-run 62s linear infinite;
+      animation: photo-run 90s linear infinite;
       will-change: transform;
     }
     .marquee-group { display: flex; gap: 14px; padding-right: 14px; }
@@ -661,7 +661,7 @@
         linear-gradient(135deg, #fffaf2, #f3e4d0);
     }
     .homeroom-section::before {
-      content: "CÔ GIÁO";
+      content: "THẦY CÔ";
       position: absolute;
       top: 24px;
       right: 4%;
@@ -815,7 +815,7 @@
       .feature-frame::before { right: -22px; }
       .motion-gallery { padding: 10px 0 72px; }
       .motion-gallery-head { width: calc(100% - 36px); align-items: start; flex-direction: column; gap: 8px; }
-      .marquee-track { animation-duration: 48s; }
+      .marquee-track { animation-duration: 70s; }
       .marquee-card { width: clamp(180px, 65vw, 265px); }
       .video-layout { grid-template-columns: 1fr; gap: 38px; }
       .video-copy { max-width: 680px; }
@@ -962,11 +962,11 @@
         <div class="gallery-head reveal">
           <div>
             <p class="section-kicker">Những người gieo hạt nắng</p>
-            <h2 class="section-title" id="gvcn-title">Dấu ấn những người cô</h2>
+            <h2 class="section-title" id="gvcn-title">Dấu ấn những người thầy, người cô</h2>
           </div>
-          <p class="section-lead">Một góc kỷ niệm dành riêng cho những cô giáo đã từng giảng dạy, dìu dắt và đồng hành cùng tập thể lớp 5/4 qua từng năm học.</p>
+          <p class="section-lead">Một góc kỷ niệm dành riêng cho những thầy cô đã từng giảng dạy, dìu dắt và đồng hành cùng tập thể lớp 5/4 qua từng năm học.</p>
         </div>
-        <div class="photo-grid homeroom-grid" id="gvcnPhotoGrid" aria-label="Thư viện ảnh các cô giáo đã dạy lớp 5/4"></div>
+        <div class="photo-grid homeroom-grid" id="gvcnPhotoGrid" aria-label="Thư viện ảnh thầy cô giáo đã dạy lớp 5/4"></div>
       </div>
     </section>
 
@@ -1068,7 +1068,6 @@
           "1793449456372_3110120158068953311_3110120158068953311_dd08d88f6b53a7766bae73f35cf8f856.jpg",
           "1793512471181_3110120158068953311_3110120158068953311_4a304ced9e5dbacc76e9527677e48e4e.jpg",
           "1793512471214_3110120158068953311_3110120158068953311_048d1ee0de25828067bcd6b937f808f6.jpg",
-          "1793883336548_3110120158068953311_3110120158068953311_766fdbebd6debc94f6f1b2758ca895dd.jpg",
           "1793883336583_3110120158068953311_3110120158068953311_721f16f554bc07634760bbfeec9d7aab.jpg",
           "1793883336593_3110120158068953311_3110120158068953311_6f4910253fa10c7c045a535ba82789f5.jpg",
           "1793883336618_3110120158068953311_3110120158068953311_9fce31aa60d26cd8e42918aff3969a6d.jpg",
@@ -1080,34 +1079,28 @@
     const images = memoryChapters.flatMap(chapter => chapter.files);
 
     const gvcnImages = [
-      "1793014065750_3110120158068953311_3110120158068953311_f2efa9350d5a3544eb192bf4472266da.jpg",
-      "1793181786422_3110120158068953311_3110120158068953311_47cb47ab14736dcf5ff0c9dd04981075.jpg",
-      "1793181786441_3110120158068953311_3110120158068953311_137834e9daee82a91c9db3e62ef0558a.jpg",
-      "1793181786456_3110120158068953311_3110120158068953311_6b496b6a0cfa820d85be2eb185e82e6e.jpg",
-      "1793181786469_3110120158068953311_3110120158068953311_f155852950cb094aebc9a9dd1d6cecf5.jpg",
-      "1793679367316_3110120158068953311_3110120158068953311_9a2ed24e6d40d8c2baaa3b442b34523e.jpg",
-      "1793883336452_3110120158068953311_3110120158068953311_04f221eb95f9529d300c577c0393065f.jpg",
-      "1793883336480_3110120158068953311_3110120158068953311_b262fe58acb0e6258b5c1cb381a614f3.jpg",
-      "1793883336498_3110120158068953311_3110120158068953311_22ef96325dc14f7c82b202cfb343c76f.jpg",
-      "1793883336514_3110120158068953311_3110120158068953311_6acd93cc2dd491e87acc2dd9f217c847.jpg",
-      "1793883336527_3110120158068953311_3110120158068953311_d969f7d0dba2e8a367fa9b56f90379d1.jpg",
-      "1793883336635_3110120158068953311_3110120158068953311_5ef5362951a3cb2183cae2040e988bb9.jpg",
-      "1793883336644_3110120158068953311_3110120158068953311_60f436ff4db2110fcbbffdd87653da0a.jpg",
-      "1793889939107_3110120158068953311_3110120158068953311_a121cc43ad59eef2dfa2cc013f1e8bd8.jpg",
-      "1793891441054_3110120158068953311_3110120158068953311_9b079feadbc4d75d68eabd59a70dde54.jpg",
-      "1793891728644_3110120158068953311_3110120158068953311_4b4a15aa574145e2c99a2d52dca2ef48.jpg",
-      "1793891728677_3110120158068953311_3110120158068953311_380de34a445f3f3d1137e397e33a4805.jpg",
-      "1793891728695_3110120158068953311_3110120158068953311_2bf9b504a6cdc4d40deeb08f3e3185b8.jpg"
+      "1793883336548_3110120158068953311_3110120158068953311_766fdbebd6debc94f6f1b2758ca895dd.jpg",
+      "GVCN/1793883336452_3110120158068953311_3110120158068953311_04f221eb95f9529d300c577c0393065f.jpg",
+      "GVCN/1793883336480_3110120158068953311_3110120158068953311_b262fe58acb0e6258b5c1cb381a614f3.jpg",
+      "GVCN/1793883336498_3110120158068953311_3110120158068953311_22ef96325dc14f7c82b202cfb343c76f.jpg",
+      "GVCN/1793883336514_3110120158068953311_3110120158068953311_6acd93cc2dd491e87acc2dd9f217c847.jpg",
+      "GVCN/1793883336527_3110120158068953311_3110120158068953311_d969f7d0dba2e8a367fa9b56f90379d1.jpg",
+      "GVCN/1793883336635_3110120158068953311_3110120158068953311_5ef5362951a3cb2183cae2040e988bb9.jpg",
+      "GVCN/1793883336644_3110120158068953311_3110120158068953311_60f436ff4db2110fcbbffdd87653da0a.jpg",
+      "GVCN/1793889939107_3110120158068953311_3110120158068953311_a121cc43ad59eef2dfa2cc013f1e8bd8.jpg",
+      "GVCN/1793891441054_3110120158068953311_3110120158068953311_9b079feadbc4d75d68eabd59a70dde54.jpg",
+      "GVCN/1793891728644_3110120158068953311_3110120158068953311_4b4a15aa574145e2c99a2d52dca2ef48.jpg",
+      "GVCN/1793891728677_3110120158068953311_3110120158068953311_380de34a445f3f3d1137e397e33a4805.jpg",
+      "GVCN/1793891728695_3110120158068953311_3110120158068953311_2bf9b504a6cdc4d40deeb08f3e3185b8.jpg"
     ];
 
     const mainGalleryPaths = images.map(file => `img/${file}`);
-    const gvcnGalleryPaths = gvcnImages.map(file => `img/GVCN/${file}`);
+    const gvcnGalleryPaths = gvcnImages.map(file => `img/${file}`);
     const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     const portraitImageNames = new Set([
       "1793014065718_3110120158068953311_3110120158068953311_f9e1a4f6d2c85496e07036f5209bd3c6.jpg",
       "1793014065768_3110120158068953311_3110120158068953311_e7d93cbe1142ce41c8860004be0e1536.jpg",
       "1793512471214_3110120158068953311_3110120158068953311_048d1ee0de25828067bcd6b937f808f6.jpg",
-      "1793883336548_3110120158068953311_3110120158068953311_766fdbebd6debc94f6f1b2758ca895dd.jpg",
       "1793883336583_3110120158068953311_3110120158068953311_721f16f554bc07634760bbfeec9d7aab.jpg",
       "1793883336610_3110120158068953311_3110120158068953311_7dc7ee5a7050944c5f404309c11f9c71.jpg",
       "1793883336662_3110120158068953311_3110120158068953311_751703bb4cb679e5e12a1026e2ea80a8.jpg",
@@ -1190,12 +1183,13 @@
     }
 
     renderMemoryChapters();
-    renderPhotoGrid("gvcnPhotoGrid", gvcnGalleryPaths, "Ảnh các cô giáo đã dạy lớp 5/4");
+    renderPhotoGrid("gvcnPhotoGrid", gvcnGalleryPaths, "Ảnh thầy cô giáo đã dạy lớp 5/4");
 
     const marqueeTrack = document.getElementById("marqueeTrack");
-    const marqueeMarkup = images.map((file, index) => `
+    const marqueeImages = [...mainGalleryPaths, ...gvcnGalleryPaths];
+    const marqueeMarkup = marqueeImages.map((path, index) => `
       <div class="marquee-card">
-        <img src="img/${file}" alt="Kỷ niệm lớp 5/4 – ảnh ${index + 1}" loading="lazy">
+        <img src="${path}" alt="Kỷ niệm lớp 5/4 và thầy cô – ảnh ${index + 1}" loading="lazy">
       </div>`).join("");
     marqueeTrack.innerHTML = `
       <div class="marquee-group">${marqueeMarkup}</div>
