@@ -770,7 +770,7 @@
       text-align: center;
       background:
         linear-gradient(rgba(62,10,20,.82), rgba(62,10,20,.9)),
-        url("img/GVCN/1793181786456_3110120158068953311_3110120158068953311_6b496b6a0cfa820d85be2eb185e82e6e.jpg") center / cover;
+        url("img/GVCN/1793883336514_3110120158068953311_3110120158068953311_6acd93cc2dd491e87acc2dd9f217c847.jpg") center / cover;
     }
     .closing .sunflower { font-size: 3rem; }
     .closing h2 {
@@ -1050,7 +1050,6 @@
           "1793014065768_3110120158068953311_3110120158068953311_e7d93cbe1142ce41c8860004be0e1536.jpg",
           "1793449456381_3110120158068953311_3110120158068953311_02bb84b4de2aa709357977a76f6ab722.jpg",
           "1793883336601_3110120158068953311_3110120158068953311_f7daa3c7079f2652aa2a88aba8c8e8d4.jpg",
-          "1793883336670_3110120158068953311_3110120158068953311_6827d8e403e3baecf3e30c34928a00f3.jpg",
           "1793883336678_3110120158068953311_3110120158068953311_289c015a73e93d5d1dfd45f42e91c86b.jpg",
           "1793883336696_3110120158068953311_3110120158068953311_fb5a2ed7a46db13b3b2699c2c273c7d4.jpg"
         ]
@@ -1097,15 +1096,15 @@
 
     const marqueeOnlyGvcnImages = [
       "GVCN/1793014065750_3110120158068953311_3110120158068953311_f2efa9350d5a3544eb192bf4472266da.jpg",
-      "GVCN/1793181786422_3110120158068953311_3110120158068953311_47cb47ab14736dcf5ff0c9dd04981075.jpg",
-      "GVCN/1793181786441_3110120158068953311_3110120158068953311_137834e9daee82a91c9db3e62ef0558a.jpg",
-      "GVCN/1793181786456_3110120158068953311_3110120158068953311_6b496b6a0cfa820d85be2eb185e82e6e.jpg",
-      "GVCN/1793679367316_3110120158068953311_3110120158068953311_9a2ed24e6d40d8c2baaa3b442b34523e.jpg"
+      "GVCN/1793181786422_3110120158068953311_3110120158068953311_47cb47ab14736dcf5ff0c9dd04981075.jpg"
     ];
 
     const mainGalleryPaths = images.map(file => `img/${file}`);
     const gvcnGalleryPaths = gvcnImages.map(file => `img/${file}`);
     const marqueeOnlyGvcnPaths = marqueeOnlyGvcnImages.map(file => `img/${file}`);
+    const marqueeExcludedPaths = new Set([
+      "img/1793883336548_3110120158068953311_3110120158068953311_766fdbebd6debc94f6f1b2758ca895dd.jpg"
+    ]);
     const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     const portraitImageNames = new Set([
       "1793014065718_3110120158068953311_3110120158068953311_f9e1a4f6d2c85496e07036f5209bd3c6.jpg",
@@ -1196,7 +1195,8 @@
     renderPhotoGrid("gvcnPhotoGrid", gvcnGalleryPaths, "Ảnh thầy cô giáo đã dạy lớp 5/4");
 
     const marqueeTrack = document.getElementById("marqueeTrack");
-    const marqueeImages = [...mainGalleryPaths, ...gvcnGalleryPaths, ...marqueeOnlyGvcnPaths];
+    const marqueeImages = [...new Set([...mainGalleryPaths, ...gvcnGalleryPaths, ...marqueeOnlyGvcnPaths])]
+      .filter(path => !marqueeExcludedPaths.has(path));
     const marqueeMarkup = marqueeImages.map((path, index) => `
       <div class="marquee-card">
         <img src="${path}" alt="Kỷ niệm lớp 5/4 và thầy cô – ảnh ${index + 1}" loading="lazy">
