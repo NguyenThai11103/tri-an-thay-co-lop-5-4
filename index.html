@@ -272,6 +272,32 @@
       color: var(--muted);
       font-size: .82rem;
     }
+    .marquee-toggle {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      min-height: 40px;
+      padding: 8px 13px;
+      border: 1px solid rgba(143,29,44,.18);
+      border-radius: 999px;
+      color: var(--muted);
+      font: 700 .82rem/1.2 "Be Vietnam Pro", sans-serif;
+      cursor: pointer;
+      background: rgba(255,255,255,.76);
+      transition: color .2s ease, background .2s ease, border-color .2s ease;
+    }
+    .marquee-toggle:hover {
+      color: var(--wine);
+      border-color: rgba(143,29,44,.3);
+      background: white;
+    }
+    .marquee-toggle:focus-visible,
+    .video-tab:focus-visible,
+    .lightbox-close:focus-visible,
+    .lightbox-nav:focus-visible {
+      outline: 3px solid var(--gold);
+      outline-offset: 3px;
+    }
     .photo-marquee {
       position: relative;
       width: 100%;
@@ -318,7 +344,8 @@
     .marquee-card:hover { transform: translateY(-8px) rotate(0); box-shadow: 0 20px 42px rgba(76,39,29,.22); }
     .marquee-card:hover img { transform: scale(1.06); }
     .photo-marquee:hover .marquee-track,
-    .photo-marquee:focus-within .marquee-track { animation-play-state: paused; }
+    .photo-marquee:focus-within .marquee-track,
+    .photo-marquee.is-paused .marquee-track { animation-play-state: paused; }
     @keyframes photo-run { to { transform: translateX(-50%); } }
 
     .letter-wrap {
@@ -438,11 +465,45 @@
     .video-copy .section-kicker { color: var(--gold-light); }
     .video-copy .section-title { color: white; }
     .video-copy .section-lead { color: rgba(255,255,255,.76); }
+    .video-tabs {
+      display: inline-flex;
+      gap: 10px;
+      margin-top: 24px;
+      padding: 6px;
+      border: 1px solid rgba(255,255,255,.2);
+      border-radius: 999px;
+      background: rgba(0,0,0,.22);
+      backdrop-filter: blur(8px);
+      flex-wrap: wrap;
+    }
+    .video-tab {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 18px;
+      border: 1px solid transparent;
+      border-radius: 999px;
+      color: rgba(255,255,255,.85);
+      font: 700 .86rem/1 "Be Vietnam Pro", sans-serif;
+      cursor: pointer;
+      background: transparent;
+      transition: all .25s ease;
+    }
+    .video-tab:hover {
+      color: white;
+      background: rgba(255,255,255,.12);
+    }
+    .video-tab.active {
+      color: var(--wine-dark);
+      background: var(--gold-light);
+      border-color: rgba(255,255,255,.5);
+      box-shadow: 0 4px 16px rgba(0,0,0,.25);
+    }
     .video-note {
       display: flex;
       align-items: center;
       gap: 13px;
-      margin-top: 30px;
+      margin-top: 24px;
       color: rgba(255,255,255,.78);
       font-size: .86rem;
       line-height: 1.55;
@@ -502,13 +563,24 @@
       line-height: 1.55;
       text-align: center;
     }
+    .video-error {
+      margin: 12px 10px 2px;
+      padding: 10px 12px;
+      border: 1px solid rgba(247,221,160,.45);
+      border-radius: 12px;
+      color: white;
+      font-size: .82rem;
+      line-height: 1.5;
+      background: rgba(30,4,10,.72);
+    }
+    .video-error a { color: var(--gold-light); font-weight: 700; }
 
     .gallery-head { display: flex; justify-content: space-between; gap: 30px; align-items: end; margin-bottom: 38px; }
     .photo-grid { columns: 4 230px; column-gap: 14px; }
     .memory-index { padding-bottom: 58px; }
     .memory-nav {
       display: grid;
-      grid-template-columns: repeat(4, minmax(0, 1fr));
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
       gap: 12px;
       margin-top: 34px;
     }
@@ -721,7 +793,7 @@
       opacity: 0;
       visibility: hidden;
       pointer-events: none;
-      transition: opacity .3s ease, visibility .3s ease;
+      transition: opacity .3s ease;
     }
     .lightbox.open { opacity: 1; visibility: visible; pointer-events: auto; }
     .lightbox img {
@@ -858,6 +930,7 @@
       .photo-marquee { overflow-x: auto; mask-image: none; -webkit-mask-image: none; }
       .marquee-track { animation: none; }
       .marquee-group[aria-hidden="true"] { display: none; }
+      .marquee-toggle { display: none; }
     }
   </style>
 </head>
@@ -902,7 +975,10 @@
           <p class="section-kicker">Dòng thời gian yêu thương</p>
           <h2 id="anh-chay-title">Kỷ niệm cứ thế nối dài...</h2>
         </div>
-        <p>Rê chuột lên ảnh để tạm dừng</p>
+        <button class="marquee-toggle" id="marqueeToggle" type="button" aria-controls="marqueeTrack" aria-pressed="false">
+          <span class="marquee-toggle-icon" aria-hidden="true">⏸</span>
+          <span class="marquee-toggle-label">Tạm dừng ảnh</span>
+        </button>
       </div>
       <div class="photo-marquee" aria-label="Dải ảnh kỷ niệm tự động chạy">
         <div class="marquee-track" id="marqueeTrack"></div>
@@ -941,18 +1017,29 @@
           <p class="section-kicker">Thước phim tri ân</p>
           <h2 class="section-title" id="video-title">Một lời cảm ơn được kể bằng những khoảnh khắc.</h2>
           <p class="section-lead">Mời thầy cô cùng xem món quà nhỏ từ tập thể lớp 5/4 — nơi những nụ cười, kỷ niệm và tình yêu thương được lưu giữ trong từng khung hình.</p>
+          <div class="video-tabs" role="tablist" aria-label="Chọn bản video tri ân">
+            <button class="video-tab active" id="tabVideoHieuUng" type="button" role="tab" aria-controls="videoPanel" aria-selected="true" tabindex="0" data-src="video_chuc_mung_20-11_hieu_ung.mp4" data-poster="img/video-poster-hieu-ung.jpg" data-duration="3 phút 52 giây" data-badge="HIỆU ỨNG 20 · 11" data-caption="Thước phim chúc mừng 20/11 kèm hiệu ứng đặc biệt dành tặng thầy cô.">
+              ✨ Bản hiệu ứng (3:52)
+            </button>
+            <button class="video-tab" id="tabVideoTongHop" type="button" role="tab" aria-controls="videoPanel" aria-selected="false" tabindex="-1" data-src="video_tong_hop_20-11.mp4" data-poster="img/video-poster-tong-hop.jpg" data-duration="7 phút 44 giây" data-badge="TỔNG HỢP 20 · 11" data-caption="Video tổng hợp trọn vẹn hành trình và kỷ niệm của tập thể lớp 5/4.">
+              🎬 Bản tổng hợp (7:44)
+            </button>
+          </div>
           <div class="video-note">
             <span class="video-note-icon" aria-hidden="true">▶</span>
-            <span>Nhấn nút phát và bật âm thanh để xem trọn vẹn video dài 3 phút 52 giây.</span>
+            <span id="videoNoteText">Nhấn nút phát và bật âm thanh để xem trọn vẹn Bản hiệu ứng dài 3 phút 52 giây.</span>
           </div>
         </div>
-        <figure class="video-frame reveal">
-          <span class="video-badge" aria-hidden="true">VIDEO 20 · 11</span>
-          <video class="tribute-video" id="tributeVideo" controls preload="metadata" playsinline aria-label="Video tri ân thầy cô nhân ngày 20 tháng 11">
-            <source src="video_chuc_mung_20-11_hieu_ung.mp4" type="video/mp4">
-            Trình duyệt của bạn chưa hỗ trợ phát video. <a href="video_chuc_mung_20-11_hieu_ung.mp4">Tải video tri ân tại đây</a>.
+        <figure class="video-frame reveal" id="videoPanel" role="tabpanel" aria-labelledby="tabVideoHieuUng">
+          <span class="video-badge" id="videoBadge" aria-hidden="true">HIỆU ỨNG 20 · 11</span>
+          <video class="tribute-video" id="tributeVideo" controls preload="metadata" playsinline poster="img/video-poster-hieu-ung.jpg" aria-label="Video tri ân thầy cô nhân ngày 20 tháng 11" aria-describedby="videoCaption videoError" src="video_chuc_mung_20-11_hieu_ung.mp4">
+            <source src="video_chuc_mung_20-11_hieu_ung.mp4" type="video/mp4" id="videoSource">
+            Trình duyệt của bạn chưa hỗ trợ phát video. <a href="video_chuc_mung_20-11_hieu_ung.mp4" id="videoDownloadLink">Tải video tri ân tại đây</a>.
           </video>
-          <figcaption>Món quà 20/11 từ tập thể lớp 5/4 gửi đến những người thầy, người cô kính yêu.</figcaption>
+          <p class="video-error" id="videoError" role="alert" hidden>
+            Không thể tải video này. <a id="videoErrorLink" href="video_chuc_mung_20-11_hieu_ung.mp4">Tải video trực tiếp</a>.
+          </p>
+          <figcaption id="videoCaption">Thước phim chúc mừng 20/11 kèm hiệu ứng đặc biệt dành tặng thầy cô.</figcaption>
         </figure>
       </div>
     </section>
@@ -1031,6 +1118,8 @@
           "1793181874528_3110120158068953311_3110120158068953311_ec891d64b223fec2d1ac9c0483daa938.jpg",
           "1793181874563_3110120158068953311_3110120158068953311_802dcc6d78b580b93e6298819fb3818a.jpg",
           "1793449456208_3110120158068953311_3110120158068953311_a238b116aba393ba41379b1857782e6a.jpg",
+          "1794113331787_3110120158068953311_3110120158068953311_99ecf110dc046d3c07d956ae763e0ded.jpg",
+          "1794113331840_3110120158068953311_3110120158068953311_62757c554e9ec880a80219f3b0648ada.jpg",
           "1793883336610_3110120158068953311_3110120158068953311_7dc7ee5a7050944c5f404309c11f9c71.jpg",
           "1793883336662_3110120158068953311_3110120158068953311_751703bb4cb679e5e12a1026e2ea80a8.jpg",
           "1793883336687_3110120158068953311_3110120158068953311_6bae75194af59e538058a4da4ad93d63.jpg",
@@ -1048,6 +1137,7 @@
         files: [
           "1793181912820_3110120158068953311_3110120158068953311_5cdfee48093c0db67dd6b5aeb9d60a07.jpg",
           "1793014065768_3110120158068953311_3110120158068953311_e7d93cbe1142ce41c8860004be0e1536.jpg",
+          "1794113331820_3110120158068953311_3110120158068953311_2f8e0d867359abb6869fa30800a37536.jpg",
           "1793449456381_3110120158068953311_3110120158068953311_02bb84b4de2aa709357977a76f6ab722.jpg",
           "1793883336601_3110120158068953311_3110120158068953311_f7daa3c7079f2652aa2a88aba8c8e8d4.jpg",
           "1793883336678_3110120158068953311_3110120158068953311_289c015a73e93d5d1dfd45f42e91c86b.jpg",
@@ -1072,12 +1162,31 @@
           "1793883336618_3110120158068953311_3110120158068953311_9fce31aa60d26cd8e42918aff3969a6d.jpg",
           "1793883336730_3110120158068953311_3110120158068953311_c64697cde19593277e0243b9f49f5d4d.jpg"
         ]
+      },
+      {
+        id: "tri-an-20-11",
+        number: "05",
+        kicker: "Tấm lòng người học trò",
+        title: "Cánh thiệp gửi trọn tri ân",
+        description: "Từng nét chữ nắn nót, từng bông hoa kẽm nhung và tấm thiệp handmade đong đầy tình cảm kính yêu mà học sinh lớp 5/4 dành tặng thầy cô nhân ngày 20/11.",
+        featuredIndex: 0,
+        files: [
+          "1794113331914_3110120158068953311_3110120158068953311_ce6710b981e7003acb4c88f279088e2e.jpg",
+          "1794113331922_3110120158068953311_3110120158068953311_028a4f8985374450b05ebbf04a4b9866.jpg",
+          "1794113331858_3110120158068953311_3110120158068953311_b40bf4db9cdce50f1496ce294a86d8a4.jpg",
+          "1794113331870_3110120158068953311_3110120158068953311_04b20f87c6030ff39e1d7905db6816e5.jpg",
+          "1794113331891_3110120158068953311_3110120158068953311_285c105d2d553666c12038dd14f09207.jpg",
+          "1794113331900_3110120158068953311_3110120158068953311_d5d719e4ce9c75c78eca22ba40f1c211.jpg",
+          "1794113331881_3110120158068953311_3110120158068953311_1a69e94f6feee0cff14b226ad0f947a3.jpg"
+        ]
       }
     ];
 
     const images = memoryChapters.flatMap(chapter => chapter.files);
 
     const gvcnImages = [
+      "1794113331914_3110120158068953311_3110120158068953311_ce6710b981e7003acb4c88f279088e2e.jpg",
+      "1794113331787_3110120158068953311_3110120158068953311_99ecf110dc046d3c07d956ae763e0ded.jpg",
       "1793883336548_3110120158068953311_3110120158068953311_766fdbebd6debc94f6f1b2758ca895dd.jpg",
       "GVCN/1793181786469_3110120158068953311_3110120158068953311_f155852950cb094aebc9a9dd1d6cecf5.jpg",
       "GVCN/1793883336452_3110120158068953311_3110120158068953311_04f221eb95f9529d300c577c0393065f.jpg",
@@ -1117,7 +1226,11 @@
       "1793883336696_3110120158068953311_3110120158068953311_fb5a2ed7a46db13b3b2699c2c273c7d4.jpg",
       "1793883336704_3110120158068953311_3110120158068953311_f903607feb4ce6085915e959273c17b9.jpg",
       "1793883336730_3110120158068953311_3110120158068953311_c64697cde19593277e0243b9f49f5d4d.jpg",
-      "1793889939075_3110120158068953311_3110120158068953311_070540f859d3550da215948d9efb5114.jpg"
+      "1793889939075_3110120158068953311_3110120158068953311_070540f859d3550da215948d9efb5114.jpg",
+      "1794113331858_3110120158068953311_3110120158068953311_b40bf4db9cdce50f1496ce294a86d8a4.jpg",
+      "1794113331881_3110120158068953311_3110120158068953311_1a69e94f6feee0cff14b226ad0f947a3.jpg",
+      "1794113331891_3110120158068953311_3110120158068953311_285c105d2d553666c12038dd14f09207.jpg",
+      "1794113331922_3110120158068953311_3110120158068953311_028a4f8985374450b05ebbf04a4b9866.jpg"
     ]);
 
     function renderPhotoGrid(gridId, paths, altPrefix, options = {}) {
@@ -1205,6 +1318,18 @@
       <div class="marquee-group">${marqueeMarkup}</div>
       <div class="marquee-group" aria-hidden="true">${marqueeMarkup.replaceAll(/alt="[^"]*"/g, 'alt=""')}</div>`;
 
+    const marquee = document.querySelector(".photo-marquee");
+    const marqueeToggle = document.getElementById("marqueeToggle");
+    const marqueeToggleIcon = marqueeToggle.querySelector(".marquee-toggle-icon");
+    const marqueeToggleLabel = marqueeToggle.querySelector(".marquee-toggle-label");
+
+    marqueeToggle.addEventListener("click", () => {
+      const paused = marquee.classList.toggle("is-paused");
+      marqueeToggle.setAttribute("aria-pressed", String(paused));
+      marqueeToggleIcon.textContent = paused ? "▶" : "⏸";
+      marqueeToggleLabel.textContent = paused ? "Tiếp tục chạy ảnh" : "Tạm dừng ảnh";
+    });
+
     if (location.hash) {
       requestAnimationFrame(() => setTimeout(() => {
         document.querySelector(location.hash)?.scrollIntoView();
@@ -1223,7 +1348,12 @@
       if (!gallery.length) return;
       activeImages = gallery;
       activeAltPrefix = altPrefix;
-      if (trigger) lastPhotoTrigger = trigger;
+      const wasClosed = !lightbox.classList.contains("open");
+      if (wasClosed) {
+        lastPhotoTrigger = trigger || document.activeElement;
+      } else if (trigger) {
+        lastPhotoTrigger = trigger;
+      }
       currentPhoto = (index + activeImages.length) % activeImages.length;
       lightboxImage.src = activeImages[currentPhoto];
       lightboxImage.alt = `${activeAltPrefix} ${currentPhoto + 1}`;
@@ -1231,14 +1361,20 @@
       lightbox.setAttribute("aria-hidden", "false");
       lightbox.classList.add("open");
       document.body.style.overflow = "hidden";
-      lightbox.querySelector(".lightbox-close").focus();
+      if (wasClosed) {
+        requestAnimationFrame(() => lightbox.querySelector(".lightbox-close").focus());
+      }
     }
 
     function closeLightbox() {
       lightbox.classList.remove("open");
       lightbox.setAttribute("aria-hidden", "true");
       document.body.style.overflow = "";
-      lastPhotoTrigger?.focus({ preventScroll: true });
+      const returnTarget = lastPhotoTrigger;
+      lastPhotoTrigger = null;
+      if (returnTarget?.isConnected && !returnTarget.disabled) {
+        returnTarget.focus({ preventScroll: true });
+      }
     }
 
     lightbox.querySelector(".lightbox-close").addEventListener("click", closeLightbox);
@@ -1247,9 +1383,37 @@
     lightbox.addEventListener("click", event => { if (event.target === lightbox) closeLightbox(); });
     document.addEventListener("keydown", event => {
       if (!lightbox.classList.contains("open")) return;
-      if (event.key === "Escape") closeLightbox();
-      if (event.key === "ArrowLeft") openLightbox(currentPhoto - 1);
-      if (event.key === "ArrowRight") openLightbox(currentPhoto + 1);
+
+      if (event.key === "Escape") {
+        event.preventDefault();
+        closeLightbox();
+        return;
+      }
+
+      if (event.key === "ArrowLeft") {
+        event.preventDefault();
+        openLightbox(currentPhoto - 1);
+        return;
+      }
+
+      if (event.key === "ArrowRight") {
+        event.preventDefault();
+        openLightbox(currentPhoto + 1);
+        return;
+      }
+
+      if (event.key === "Tab") {
+        const focusable = [...lightbox.querySelectorAll("button:not([disabled])")];
+        const first = focusable[0];
+        const last = focusable[focusable.length - 1];
+        if (event.shiftKey && document.activeElement === first) {
+          event.preventDefault();
+          last.focus();
+        } else if (!event.shiftKey && document.activeElement === last) {
+          event.preventDefault();
+          first.focus();
+        }
+      }
     });
 
     if (prefersReducedMotion) {
@@ -1274,12 +1438,23 @@
     const voiceAudio = document.getElementById("voiceAudio");
     const musicAudio = document.getElementById("musicAudio");
     const tributeVideo = document.getElementById("tributeVideo");
+    const videoTabs = [...document.querySelectorAll(".video-tab")];
+    const videoPanel = document.getElementById("videoPanel");
+    const videoSource = document.getElementById("videoSource");
+    const videoDownloadLink = document.getElementById("videoDownloadLink");
+    const videoNoteText = document.getElementById("videoNoteText");
+    const videoBadge = document.getElementById("videoBadge");
+    const videoCaption = document.getElementById("videoCaption");
+    const videoError = document.getElementById("videoError");
+    const videoErrorLink = document.getElementById("videoErrorLink");
     let musicPlaying = false;
     let musicRequested = false;
     let voiceReading = false;
     let resumeMusicAfterVoice = false;
     let videoPlaying = false;
     let resumeMusicAfterVideo = false;
+    let switchingVideoSource = false;
+    let videoSwitchToken = 0;
 
     function updateMediaControlLock() {
       musicButton.disabled = voiceReading || videoPlaying;
@@ -1349,7 +1524,12 @@
       resumeMusicAfterVideoPlayback();
     }
 
+    function clearVideoError() {
+      videoError.hidden = true;
+    }
+
     tributeVideo.addEventListener("play", () => {
+      switchingVideoSource = false;
       videoPlaying = true;
       resumeMusicAfterVideo = musicRequested;
 
@@ -1364,9 +1544,18 @@
       updateMusicButton(false);
       updateMediaControlLock();
     });
-    tributeVideo.addEventListener("pause", finishVideoPlayback);
+    tributeVideo.addEventListener("pause", () => {
+      if (!switchingVideoSource) finishVideoPlayback();
+    });
     tributeVideo.addEventListener("ended", finishVideoPlayback);
-    tributeVideo.addEventListener("error", finishVideoPlayback);
+    tributeVideo.addEventListener("loadstart", clearVideoError);
+    tributeVideo.addEventListener("loadedmetadata", clearVideoError);
+    tributeVideo.addEventListener("error", () => {
+      switchingVideoSource = false;
+      finishVideoPlayback();
+      videoErrorLink.href = tributeVideo.currentSrc || tributeVideo.getAttribute("src") || videoSource?.src;
+      videoError.hidden = false;
+    });
 
     function updateVoiceButton(isReading) {
       voiceButton.classList.toggle("speaking", isReading);
@@ -1443,6 +1632,65 @@
       } else {
         startVoiceReading();
       }
+    });
+
+    function activateVideoTab(tab, moveFocus = false) {
+      const wasPlaying = videoPlaying;
+      const newSrc = tab.dataset.src;
+      const switchToken = ++videoSwitchToken;
+      switchingVideoSource = true;
+
+      videoTabs.forEach(item => {
+        const selected = item === tab;
+        item.classList.toggle("active", selected);
+        item.setAttribute("aria-selected", String(selected));
+        item.tabIndex = selected ? 0 : -1;
+      });
+
+      videoPanel.setAttribute("aria-labelledby", tab.id);
+      if (moveFocus) tab.focus();
+
+      clearVideoError();
+      videoErrorLink.href = newSrc;
+      tributeVideo.pause();
+      tributeVideo.src = newSrc;
+      tributeVideo.poster = tab.dataset.poster;
+      videoSource.src = newSrc;
+      videoDownloadLink.href = newSrc;
+      videoNoteText.textContent = `Nhấn nút phát và bật âm thanh để xem trọn vẹn ${tab.textContent.trim()} dài ${tab.dataset.duration}.`;
+      videoBadge.textContent = tab.dataset.badge;
+      videoCaption.textContent = tab.dataset.caption;
+      tributeVideo.addEventListener("loadedmetadata", () => {
+        if (switchToken === videoSwitchToken) switchingVideoSource = false;
+      }, { once: true });
+      tributeVideo.load();
+
+      if (wasPlaying) {
+        tributeVideo.play().catch(() => {
+          if (switchToken !== videoSwitchToken) return;
+          switchingVideoSource = false;
+          finishVideoPlayback();
+        });
+      }
+    }
+
+    videoTabs.forEach(tab => {
+      tab.addEventListener("click", () => {
+        if (tab.getAttribute("aria-selected") === "true") return;
+        activateVideoTab(tab);
+      });
+
+      tab.addEventListener("keydown", event => {
+        const index = videoTabs.indexOf(tab);
+        let target;
+        if (event.key === "ArrowRight") target = videoTabs[(index + 1) % videoTabs.length];
+        if (event.key === "ArrowLeft") target = videoTabs[(index - 1 + videoTabs.length) % videoTabs.length];
+        if (event.key === "Home") target = videoTabs[0];
+        if (event.key === "End") target = videoTabs[videoTabs.length - 1];
+        if (!target) return;
+        event.preventDefault();
+        activateVideoTab(target, true);
+      });
     });
 
   </script>

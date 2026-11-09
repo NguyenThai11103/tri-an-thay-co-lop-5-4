@@ -1,2 +1,10 @@
 .vercel
 .netlify
+
+# Local source media; web-ready assets stay tracked at the project root.
+/video/
+/video_chuc_mung_20-11.mp4
+/video_moi_chuc_mung_20-11.mp4
+/Thương Lắm Thầy Cô Ơi - Bé Phương Anh MV.mp3
+/gui_thay_co_nhung_nguoi_ket_noi_nhung_uoc_3735241d-1e95-4927-98cd-c720344cc7ef.mp3
+/.ffmpeg-pass-*
