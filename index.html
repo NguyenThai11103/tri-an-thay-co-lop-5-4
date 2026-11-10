@@ -292,7 +292,6 @@
       background: white;
     }
     .marquee-toggle:focus-visible,
-    .video-tab:focus-visible,
     .lightbox-close:focus-visible,
     .lightbox-nav:focus-visible {
       outline: 3px solid var(--gold);
@@ -465,40 +464,6 @@
     .video-copy .section-kicker { color: var(--gold-light); }
     .video-copy .section-title { color: white; }
     .video-copy .section-lead { color: rgba(255,255,255,.76); }
-    .video-tabs {
-      display: inline-flex;
-      gap: 10px;
-      margin-top: 24px;
-      padding: 6px;
-      border: 1px solid rgba(255,255,255,.2);
-      border-radius: 999px;
-      background: rgba(0,0,0,.22);
-      backdrop-filter: blur(8px);
-      flex-wrap: wrap;
-    }
-    .video-tab {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      padding: 10px 18px;
-      border: 1px solid transparent;
-      border-radius: 999px;
-      color: rgba(255,255,255,.85);
-      font: 700 .86rem/1 "Be Vietnam Pro", sans-serif;
-      cursor: pointer;
-      background: transparent;
-      transition: all .25s ease;
-    }
-    .video-tab:hover {
-      color: white;
-      background: rgba(255,255,255,.12);
-    }
-    .video-tab.active {
-      color: var(--wine-dark);
-      background: var(--gold-light);
-      border-color: rgba(255,255,255,.5);
-      box-shadow: 0 4px 16px rgba(0,0,0,.25);
-    }
     .video-note {
       display: flex;
       align-items: center;
@@ -1017,29 +982,21 @@
           <p class="section-kicker">Thước phim tri ân</p>
           <h2 class="section-title" id="video-title">Một lời cảm ơn được kể bằng những khoảnh khắc.</h2>
           <p class="section-lead">Mời thầy cô cùng xem món quà nhỏ từ tập thể lớp 5/4 — nơi những nụ cười, kỷ niệm và tình yêu thương được lưu giữ trong từng khung hình.</p>
-          <div class="video-tabs" role="tablist" aria-label="Chọn bản video tri ân">
-            <button class="video-tab active" id="tabVideoHieuUng" type="button" role="tab" aria-controls="videoPanel" aria-selected="true" tabindex="0" data-src="video_chuc_mung_20-11_hieu_ung.mp4" data-poster="img/video-poster-hieu-ung.jpg" data-duration="3 phút 52 giây" data-badge="HIỆU ỨNG 20 · 11" data-caption="Thước phim chúc mừng 20/11 kèm hiệu ứng đặc biệt dành tặng thầy cô.">
-              Video 1
-            </button>
-            <button class="video-tab" id="tabVideoTongHop" type="button" role="tab" aria-controls="videoPanel" aria-selected="false" tabindex="-1" data-src="video_tong_hop_20-11.mp4" data-poster="img/video-poster-tong-hop.jpg" data-duration="7 phút 44 giây" data-badge="TỔNG HỢP 20 · 11" data-caption="Video tổng hợp trọn vẹn hành trình và kỷ niệm của tập thể lớp 5/4.">
-              Video 2
-            </button>
-          </div>
           <div class="video-note">
             <span class="video-note-icon" aria-hidden="true">▶</span>
-            <span id="videoNoteText">Nhấn nút phát và bật âm thanh để xem trọn vẹn Video 1 dài 3 phút 52 giây.</span>
+            <span id="videoNoteText">Nhấn nút phát và bật âm thanh để xem trọn vẹn video tri ân dài 7 phút 53 giây.</span>
           </div>
         </div>
-        <figure class="video-frame reveal" id="videoPanel" role="tabpanel" aria-labelledby="tabVideoHieuUng">
-          <span class="video-badge" id="videoBadge" aria-hidden="true">HIỆU ỨNG 20 · 11</span>
-          <video class="tribute-video" id="tributeVideo" controls preload="metadata" playsinline poster="img/video-poster-hieu-ung.jpg" aria-label="Video tri ân thầy cô nhân ngày 20 tháng 11" aria-describedby="videoCaption videoError" src="video_chuc_mung_20-11_hieu_ung.mp4">
-            <source src="video_chuc_mung_20-11_hieu_ung.mp4" type="video/mp4" id="videoSource">
-            Trình duyệt của bạn chưa hỗ trợ phát video. <a href="video_chuc_mung_20-11_hieu_ung.mp4" id="videoDownloadLink">Tải video tri ân tại đây</a>.
+        <figure class="video-frame reveal" id="videoPanel">
+          <span class="video-badge" id="videoBadge" aria-hidden="true">TRI ÂN 20 · 11</span>
+          <video class="tribute-video" id="tributeVideo" controls preload="metadata" playsinline poster="img/video-poster-tong-hop.jpg" aria-label="Video tri ân thầy cô nhân ngày 20 tháng 11" aria-describedby="videoCaption videoError" src="video_tong_hop_20-11.mp4">
+            <source src="video_tong_hop_20-11.mp4" type="video/mp4" id="videoSource">
+            Trình duyệt của bạn chưa hỗ trợ phát video. <a href="video_tong_hop_20-11.mp4" id="videoDownloadLink">Tải video tri ân tại đây</a>.
           </video>
           <p class="video-error" id="videoError" role="alert" hidden>
-            Không thể tải video này. <a id="videoErrorLink" href="video_chuc_mung_20-11_hieu_ung.mp4">Tải video trực tiếp</a>.
+            Không thể tải video này. <a id="videoErrorLink" href="video_tong_hop_20-11.mp4">Tải video trực tiếp</a>.
           </p>
-          <figcaption id="videoCaption">Thước phim chúc mừng 20/11 kèm hiệu ứng đặc biệt dành tặng thầy cô.</figcaption>
+          <figcaption id="videoCaption">Video tổng hợp trọn vẹn hành trình và kỷ niệm của tập thể lớp 5/4 gửi tặng thầy cô.</figcaption>
         </figure>
       </div>
     </section>
@@ -1438,8 +1395,6 @@
     const voiceAudio = document.getElementById("voiceAudio");
     const musicAudio = document.getElementById("musicAudio");
     const tributeVideo = document.getElementById("tributeVideo");
-    const videoTabs = [...document.querySelectorAll(".video-tab")];
-    const videoPanel = document.getElementById("videoPanel");
     const videoSource = document.getElementById("videoSource");
     const videoDownloadLink = document.getElementById("videoDownloadLink");
     const videoNoteText = document.getElementById("videoNoteText");
@@ -1453,8 +1408,6 @@
     let resumeMusicAfterVoice = false;
     let videoPlaying = false;
     let resumeMusicAfterVideo = false;
-    let switchingVideoSource = false;
-    let videoSwitchToken = 0;
 
     function updateMediaControlLock() {
       musicButton.disabled = voiceReading || videoPlaying;
@@ -1529,7 +1482,6 @@
     }
 
     tributeVideo.addEventListener("play", () => {
-      switchingVideoSource = false;
       videoPlaying = true;
       resumeMusicAfterVideo = musicRequested;
 
@@ -1544,14 +1496,11 @@
       updateMusicButton(false);
       updateMediaControlLock();
     });
-    tributeVideo.addEventListener("pause", () => {
-      if (!switchingVideoSource) finishVideoPlayback();
-    });
+    tributeVideo.addEventListener("pause", finishVideoPlayback);
     tributeVideo.addEventListener("ended", finishVideoPlayback);
     tributeVideo.addEventListener("loadstart", clearVideoError);
     tributeVideo.addEventListener("loadedmetadata", clearVideoError);
     tributeVideo.addEventListener("error", () => {
-      switchingVideoSource = false;
       finishVideoPlayback();
       videoErrorLink.href = tributeVideo.currentSrc || tributeVideo.getAttribute("src") || videoSource?.src;
       videoError.hidden = false;
@@ -1634,64 +1583,6 @@
       }
     });
 
-    function activateVideoTab(tab, moveFocus = false) {
-      const wasPlaying = videoPlaying;
-      const newSrc = tab.dataset.src;
-      const switchToken = ++videoSwitchToken;
-      switchingVideoSource = true;
-
-      videoTabs.forEach(item => {
-        const selected = item === tab;
-        item.classList.toggle("active", selected);
-        item.setAttribute("aria-selected", String(selected));
-        item.tabIndex = selected ? 0 : -1;
-      });
-
-      videoPanel.setAttribute("aria-labelledby", tab.id);
-      if (moveFocus) tab.focus();
-
-      clearVideoError();
-      videoErrorLink.href = newSrc;
-      tributeVideo.pause();
-      tributeVideo.src = newSrc;
-      tributeVideo.poster = tab.dataset.poster;
-      videoSource.src = newSrc;
-      videoDownloadLink.href = newSrc;
-      videoNoteText.textContent = `Nhấn nút phát và bật âm thanh để xem trọn vẹn ${tab.textContent.trim()} dài ${tab.dataset.duration}.`;
-      videoBadge.textContent = tab.dataset.badge;
-      videoCaption.textContent = tab.dataset.caption;
-      tributeVideo.addEventListener("loadedmetadata", () => {
-        if (switchToken === videoSwitchToken) switchingVideoSource = false;
-      }, { once: true });
-      tributeVideo.load();
-
-      if (wasPlaying) {
-        tributeVideo.play().catch(() => {
-          if (switchToken !== videoSwitchToken) return;
-          switchingVideoSource = false;
-          finishVideoPlayback();
-        });
-      }
-    }
-
-    videoTabs.forEach(tab => {
-      tab.addEventListener("click", () => {
-        if (tab.getAttribute("aria-selected") === "true") return;
-        activateVideoTab(tab);
-      });
-
-      tab.addEventListener("keydown", event => {
-        const index = videoTabs.indexOf(tab);
-        let target;
-        if (event.key === "ArrowRight") target = videoTabs[(index + 1) % videoTabs.length];
-        if (event.key === "ArrowLeft") target = videoTabs[(index - 1 + videoTabs.length) % videoTabs.length];
-        if (event.key === "Home") target = videoTabs[0];
-        if (event.key === "End") target = videoTabs[videoTabs.length - 1];
-        if (!target) return;
-        event.preventDefault();
-        activateVideoTab(target, true);
-      });
-    });
 
   </script>
 </body>
