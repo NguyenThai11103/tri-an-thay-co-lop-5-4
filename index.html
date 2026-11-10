@@ -497,21 +497,6 @@
       box-shadow: 0 35px 85px rgba(20,3,8,.42);
       backdrop-filter: blur(12px);
     }
-    .video-badge {
-      position: absolute;
-      top: 24px;
-      left: -25px;
-      z-index: 2;
-      padding: 10px 14px;
-      border: 5px solid #651522;
-      border-radius: 999px;
-      color: var(--wine-dark);
-      font-size: .68rem;
-      font-weight: 800;
-      letter-spacing: .12em;
-      background: var(--gold-light);
-      box-shadow: 0 9px 24px rgba(0,0,0,.28);
-    }
     .tribute-video {
       display: block;
       width: 100%;
@@ -883,7 +868,6 @@
       .btn { min-height: 48px; padding-inline: 16px; font-size: .82rem; }
       .letter-card { padding-inline: 23px; }
       .video-frame { width: calc(100% - 16px); padding: 7px; border-radius: 27px; }
-      .video-badge { left: -14px; border-width: 4px; }
       .tribute-video { border-radius: 20px; }
     }
 
@@ -988,7 +972,6 @@
           </div>
         </div>
         <figure class="video-frame reveal" id="videoPanel">
-          <span class="video-badge" id="videoBadge" aria-hidden="true">TRI ÂN 20 · 11</span>
           <video class="tribute-video" id="tributeVideo" controls preload="metadata" playsinline poster="img/video-poster-tong-hop.jpg" aria-label="Video tri ân thầy cô nhân ngày 20 tháng 11" aria-describedby="videoCaption videoError" src="video_tong_hop_20-11.mp4">
             <source src="video_tong_hop_20-11.mp4" type="video/mp4" id="videoSource">
             Trình duyệt của bạn chưa hỗ trợ phát video. <a href="video_tong_hop_20-11.mp4" id="videoDownloadLink">Tải video tri ân tại đây</a>.
@@ -1398,7 +1381,6 @@
     const videoSource = document.getElementById("videoSource");
     const videoDownloadLink = document.getElementById("videoDownloadLink");
     const videoNoteText = document.getElementById("videoNoteText");
-    const videoBadge = document.getElementById("videoBadge");
     const videoCaption = document.getElementById("videoCaption");
     const videoError = document.getElementById("videoError");
     const videoErrorLink = document.getElementById("videoErrorLink");
